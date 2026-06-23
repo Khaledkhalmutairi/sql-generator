@@ -7,8 +7,8 @@ client = Groq(api_key=st.secrets["GROQ_API_KEY"])
 st.title(" 🗄️ SQL Query Generator")
 st.write("!جاهز SQL اكتب سؤالك بالعربي أو الإنجليزي وبيطلع لك ")
 
-db_type = st.selectbox("اختر قاعدة البيانات:", ["MySQL", "PostgreSQL", "SQL Server", "SQLite"])
-user_input = st.text_area("وصف البيانات اللي تبغاها:", placeholder="مثال: ابغى كل العملاء اللي اشتروا اكثر من مرتين")
+db_type = st.selectbox(":اختر قاعدة البيانات", ["MySQL", "PostgreSQL", "SQL Server", "SQLite"])
+user_input = st.text_area(":وصف البيانات اللي تبغاها", placeholder="مثال: ابغى كل العملاء اللي اشتروا اكثر من مرتين")
 
 if st.button("Generate SQL⚡"):
     if user_input:
