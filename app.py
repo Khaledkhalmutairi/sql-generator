@@ -12,38 +12,48 @@ user_input = st.text_area(":وصف البيانات اللي تبغاها", plac
 
 if st.button("Generate SQL⚡"):
     if user_input:
-        lang_check = client.chat.completions.create(
+        check = client.chat.completions.create(
             model="llama-3.3-70b-versatile",
-            messages=[{"role": "user", "content": "Is this text Arabic or English? Reply with one word only: Arabic or English. Text: " + user_input}]
+            messages=[{"role": "user", "content": "Is this request related to database or SQL query? Reply with one word only: Yes or No.\nRequest: " + user_input}]
         )
-        language = lang_check.choices[0].message.content.strip()
+        is_sql = check.choices[0].message.content.strip()
 
-        if "Arabic" in language:
-            system_msg = "You are a SQL expert. Rules: 1. Explain in Modern Standard Arabic only. 2. Never put English words inside Arabic sentences. 3. Technical terms like SELECT and GROUP BY go inside backticks only. 4. Format every line as: `SQL line` : Arabic explanation only."
+        if "No" in is_sql:
+            st.warning("⚠️ Please enter a request related to SQL or databases only.")
         else:
-            system_msg = "You are a SQL expert. Explain in English only. Format every line as: `SQL line` : English explanation only. Never mix languages."
-        prompt = "Write a " + db_type + " SQL query for this request: " + user_input + "\n\nStrict rules:\n1. The SQL query must use English only for all table names, column names, and keywords.\n2. Start with the SQL code block\n3. After the SQL block, explain each line in this exact format:\n`SQL line here` : explanation here\n4. Each SQL line on its own row followed by colon and explanation\n5. One language only for explanations"
+            lang_check = client.chat.completions.create(
+                model="llama-3.3-70b-versatile",
+                messages=[{"role": "user", "content": "Is this text Arabic or English? Reply with one word only: Arabic or English. Text: " + user_input}]
+            )
+            language = lang_check.choices[0].message.content.strip()
 
-        response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
-            messages=[
-                {"role": "system", "content": system_msg},
-                {"role": "user", "content": prompt}
-            ]
-        )
-        result = response.choices[0].message.content
+            if "Arabic" in language:
+                system_msg = "You are a SQL expert. Rules: 1. Explain in Modern Standard Arabic only. 2. Never put English words inside Arabic sentences. 3. Technical terms like SELECT and GROUP BY go inside backticks only. 4. Format every line as: `SQL line` : Arabic explanation only."
+            else:
+                system_msg = "You are a SQL expert. Explain in English only. Format every line as: `SQL line` : English explanation only. Never mix languages."
 
-        if "```sql" in result:
-            sql_part = result.split("```sql")[1].split("```")[0].strip()
-            explanation_part = result.split("```")[-1].strip()
-            cleaned = re.sub(r'[^\u0600-\u06FF\u0020-\u007E\n\r\t،؟!:.`*-]', '', explanation_part)
+            prompt = "Write a " + db_type + " SQL query for this request: " + user_input + "\n\nStrict rules:\n1. The SQL query must use English only for all table names, column names, and keywords.\n2. Start with the SQL code block\n3. After the SQL block, explain each line in this exact format:\n`SQL line here` : explanation here\n4. Each SQL line on its own row followed by colon and explanation\n5. One language only for explanations"
 
-            st.subheader("SQL Query")
-            st.code(sql_part, language="sql")
+            response = client.chat.completions.create(
+                model="llama-3.3-70b-versatile",
+                messages=[
+                    {"role": "system", "content": system_msg},
+                    {"role": "user", "content": prompt}
+                ]
+            )
+            result = response.choices[0].message.content
 
-            st.subheader("الشرح")
-            st.markdown(cleaned)
-        else:
-            st.markdown(result)
+            if "```sql" in result:
+                sql_part = result.split("```sql")[1].split("```")[0].strip()
+                explanation_part = result.split("```")[-1].strip()
+                cleaned = re.sub(r'[^\u0600-\u06FF\u0020-\u007E\n\r\t،؟!:.`*-]', '', explanation_part)
+
+                st.subheader("SQL Query")
+                st.code(sql_part, language="sql")
+
+                st.subheader("الشرح")
+                st.markdown(cleaned)
+            else:
+                st.markdown(result)
     else:
         st.warning("⚠️ اكتب وصف أولاً!")
