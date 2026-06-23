@@ -32,10 +32,7 @@ if st.button("Generate SQL⚡"):
             else:
                 system_msg = "You are a SQL expert. Explain in English only. Format every line as: `SQL line` : English explanation only. Never mix languages."
 
-            arabic_words = re.findall(r'[\u0600-\u06FF]+', user_input)
-            arabic_terms = ', '.join(arabic_words) if arabic_words else 'none'
-
-            prompt = "Write a " + db_type + " SQL query for this request: " + user_input + "\n\nStrict rules:\n1. The SQL query must use English only for all table names, column names, and keywords.\n2. These Arabic terms must appear in the query EXACTLY as written, character by character: " + arabic_terms + "\n3. Do NOT change, translate, or modify any Arabic text.\n4. Start with the SQL code block\n5. After the SQL block, explain each line in this exact format:\n`SQL line here` : explanation here\n6. One language only for explanations"            
+            prompt = "Write a " + db_type + " SQL query for this request: " + user_input + "\n\nStrict rules:\n1. Use English only for table names, column names, and SQL keywords.\n2. For string values in WHERE clauses, copy them EXACTLY from the user request. For example if user says 'الرياض' then write WHERE city = 'الرياض' exactly.\n3. Do NOT alter, shorten, or paraphrase any Arabic string value.\n4. Start with the SQL code block\n5. After the SQL block, explain each line:\n`SQL line here` : explanation here\n6. One language only for explanations"
             
             
             response = client.chat.completions.create(
