@@ -32,7 +32,12 @@ if st.button("Generate SQL⚡"):
             else:
                 system_msg = "You are a SQL expert. Explain in English only. Format every line as: `SQL line` : English explanation only. Never mix languages."
 
-            prompt = "Write a " + db_type + " SQL query for this request: " + user_input + "\n\nStrict rules:\n1. The SQL query must use English only for all table names, column names, and keywords.\n2. Keep any proper nouns, names, or places exactly as written by the user without changing or translating them.\n3. Start with the SQL code block\n4. After the SQL block, explain each line in this exact format:\n`SQL line here` : explanation here\n5. Each SQL line on its own row followed by colon and explanation\n6. One language only for explanations"
+            arabic_words = re.findall(r'[\u0600-\u06FF]+', user_input)
+            arabic_terms = ', '.join(arabic_words) if arabic_words else 'none'
+
+            prompt = "Write a " + db_type + " SQL query for this request: " + user_input + "\n\nStrict rules:\n1. The SQL query must use English only for all table names, column names, and keywords.\n2. These Arabic terms must appear in the query EXACTLY as written, character by character: " + arabic_terms + "\n3. Do NOT change, translate, or modify any Arabic text.\n4. Start with the SQL code block\n5. After the SQL block, explain each line in this exact format:\n`SQL line here` : explanation here\n6. One language only for explanations"            
+            
+            
             response = client.chat.completions.create(
                 model="llama-3.3-70b-versatile",
                 messages=[
